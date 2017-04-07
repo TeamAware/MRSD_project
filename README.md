@@ -5,6 +5,10 @@ First, create catkin workspace and include everything in this repository in the 
 Next, download the model folder from team's Google drive (team.aware.cmu@gmail.com).
 Copy the model folder and paste it inside the cv_tracker folder
 
+Replace the /flea3/launch/stereo_node.launch with the stereo_node.launch from team's Google drive (team.aware.cmu@gmail.com).
+
+Include the two yaml files from team's Google drive (team.aware.cmu@gmail.com) in your ROS_HOME 
+
 ------------------------------------------------------
 
 *To launch the image capturing module:
