@@ -1,0 +1,17 @@
+<launch>
+	
+	<!-- arguments list -->
+	
+	<arg name="stereo_vision_node" default="/elas_ros/depth"/>
+	<arg name="ssd_car_topic_str" default="/obj_car/image_obj"/> 
+	<arg name="ssd_person_topic_str" default="/obj_person/image_obj"/> 
+
+	<!-- depth_measure -->
+	<node pkg="depth_measure" name="depth_measure" type="depth_measure" output="screen">
+		<param name="stereo_vision_node" type="str" value="$(arg stereo_vision_node)"/>
+		<param name="ssd_car_topic_str" type="str" value="$(arg ssd_car_topic_str)"/>
+		<param name="ssd_person_topic_str" type="str" value="$(arg ssd_person_topic_str)"/>
+		
+	</node>
+	
+</launch>
