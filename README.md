@@ -2,7 +2,8 @@
 
 Create catkin workspace and include everything in this repository in the src folder
 
-
+First, download the model folder from team's Google drive ()
+Copy the model folder and paste it inside the cv_tracker folder 
 ------------------------------------------------------
 
 *To launch the image capturing module:
