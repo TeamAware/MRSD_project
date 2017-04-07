@@ -1,5 +1,11 @@
 # MRSD_project
 
+Create catkin workspace and include everything in this repository in the src folder
+
+First, download the model folder from team's Google drive (team.aware.cmu@gmail.com)
+Copy the model folder and paste it inside the cv_tracker folder 
+------------------------------------------------------
+
 *To launch the image capturing module:
   
   roslaunch flea3 stereo_node.launch 
