@@ -1,28 +1,41 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(depth_measure)
+set(Boost_INCLUDE_DIRS "/usr/include/boost")
+
+project(beginner_tutorials)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
+add_definitions(-std=c++11 -Wall -Wextra)
+
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  image_transport
-  image_geometry
-  roscpp
-  sensor_msgs
-  std_msgs
-  genmsg
 
 
-  message_generation
+
+
+
+find_package(
+  catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg message_generation
 )
-find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS signals)
+find_package(
+  Boost REQUIRED COMPONENTS system program_options 
+)
 
-## System dependencies are found with CMake's conventions
+# BOOST STUFF FOR PARSER
+# include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+# rosbuild_init()
+# rosbuild_add_boost_directories()
+# rosbuild_add_library(talker src/talker.cpp)
+# rosbuild_link_boost(talker system asio program_options)
+
+# add_boost_directories()
+# add_library(talker src/talker.cpp)
+# link_boost(talker system asio program_options)
+
+# find_package(Boost REQUIRED COMPONENTS system program_options)
+## System dependencies are Boost_INCLUDE_DIRSfound with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
 
@@ -57,16 +70,11 @@ find_package(Boost REQUIRED COMPONENTS signals)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-   FILES
-   depth.msg
-   position.msg
-   image_obj.msg
-   image_obj_ranged.msg
-   image_obj_tracked.msg
-   image_rect.msg
-   image_rect_ranged.msg
-   obj_label.msg
+ 	FILES RadarTCP.msg
+#   Message1.msg
 #   Message2.msg
+#	DIRECTORY msg 
+#	FILES Num.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -84,12 +92,9 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
+ generate_messages(
    DEPENDENCIES
    std_msgs
-   sensor_msgs
-   geometry_msgs
-
  )
 
 ################################################
@@ -122,14 +127,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    CATKIN_DEPENDS
-#  LIBRARIES depth_measure
-#  CATKIN_DEPENDS 
-    roscpp 
-    std_msgs
-    sensor_msgs
-    message_runtime
-#  DEPENDS system_lib
+	INCLUDE_DIRS include
+#  LIBRARIES beginner_tutorials
+	CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+	DEPENDS Boost
 )
 
 ###########
@@ -139,13 +140,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(
-  ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/depth_measure.cpp
+#   src/${PROJECT_NAME}/beginner_tutorials.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -156,17 +154,14 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/depth_measure_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/beginner_tutorials_node.cpp)
 
-add_executable(depth_measure src/depth_measure.cpp)
-add_dependencies(depth_measure cv_tracker_generate_messages_cpp depth_measure_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-# set_target_properties(depth_measure 
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -216,10 +211,63 @@ target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_depth_measure.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_beginner_tutorials.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+# include_directories(include ${catkin_INCLUDE_DIRS})
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
+
+
+
+
+add_executable(talker src/talker.cpp)
+# target_link_libraries(talker ${catkin_LIBRARIES})
+add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+target_link_libraries(
+	talker 
+	${catkin_LIBRARIES} 
+	${Boost_LIBRARIES}
+)
+
+
+add_executable(listener src/listener.cpp)
+add_dependencies(listener beginner_tutorials_generate_messages_cpp)
+target_link_libraries(listener ${catkin_LIBRARIES})
+
+set(Boost_USE_STATIC_LIBS_OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

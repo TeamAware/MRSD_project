@@ -1,10 +1,11 @@
 #include "LkTracker.hpp"
 
 
-LkTracker::LkTracker(int in_id, float in_min_height, float in_max_height, float in_range)
+LkTracker::LkTracker(int in_id)
 {
-	max_point_count_ 		= 500;
-	criteria_max_iteration_	= 20;
+
+	max_point_count_ 		= 100;
+	criteria_max_iteration_	= 10;
 	criteria_epsilon_		= 0.03;
 	corner_window_size_		= 31;
 	corner_subwindow_size_	= 10;
@@ -14,7 +15,7 @@ LkTracker::LkTracker(int in_id, float in_min_height, float in_max_height, float 
 										);
 	sub_pixel_window_size_ 	= cv::Size(corner_subwindow_size_, corner_subwindow_size_);
 	window_size_ 			= cv::Size(corner_window_size_, corner_window_size_);
-
+	
 	frame_count_			= 0;
 
 	current_centroid_x_		= 0;
@@ -23,13 +24,13 @@ LkTracker::LkTracker(int in_id, float in_min_height, float in_max_height, float 
 	previous_centroid_y_	= 0;
 
 	cv::generateColors(colors_, 2);
-	lifespan_				= 45;
+	lifespan_				= 30;
 	DEFAULT_LIFESPAN_		= 45;
 	object_id				= in_id;
-
-	min_height_ 			= in_min_height;
-	max_height_ 			= in_max_height;
-	range_					= in_range;
+	std::cout<< "enter lkt2"<<std::endl;
+	// min_height_ 			= in_min_height;
+	// max_height_ 			= in_max_height;
+	// range_					= in_range;
 }
 cv::LatentSvmDetector::ObjectDetection LkTracker::GetTrackedObject()
 {
@@ -88,6 +89,7 @@ unsigned long int LkTracker::GetFrameCount()
 
 cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetection in_detection, bool in_update)
 {
+	std::cout<< "enter track"<<std::endl;
 	cv::Mat gray_image;
 	//cv::cvtColor(in_image, in_image, cv::COLOR_RGB2BGR);
 	cv::cvtColor(in_image, gray_image, cv::COLOR_BGR2GRAY);
@@ -110,6 +112,8 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 
 		lifespan_ = DEFAULT_LIFESPAN_;
 	}
+
+	
 	int sum_x = 0;
 	int sum_y = 0;
 	std::vector<cv::Point2f> valid_points;
@@ -197,6 +201,7 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 			//cv::circle(in_image, current_points_[i], 3 , cv::Scalar(0,255,0), 2);
 		}
 	}
+	std::cout<<"stage1"<<std::endl;
 	if (valid_points.size()<=2)
 	{
 		current_rect_ = cv::LatentSvmDetector::ObjectDetection(cv::Rect(0,0,0,0),0,0);
@@ -206,7 +211,13 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 
 	cv::Mat labels;
 	cv::Mat centers;
-
+	std::cout<<"stage2"<<std::endl;
+	for (int i = 0; i< valid_points.size();i++)
+	{
+		std::cout<<valid_points[0].x<<std::endl;
+		std::cout<<valid_points[0].y<<std::endl;
+	}
+	
 	cv::kmeans(valid_points,
 					2,
 					labels,
@@ -214,7 +225,7 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 					3,
 					cv::KMEANS_PP_CENTERS,
 					centers);
-
+	std::cout<<"stage3"<<std::endl;
 	cv::Point2f center1 = centers.at<cv::Point2f>(0);
 	cv::Point2f center2 = centers.at<cv::Point2f>(1);
 
@@ -232,7 +243,7 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 		colors[0]=colors_[1];
 		colors[1]=colors_[0];
 	}
-
+	
 	//cv::circle(in_image, center1, 5 , (cv::Scalar)colors[0], 3);
 	//cv::circle(in_image, center2, 5 , (cv::Scalar)colors[1], 3);
 
@@ -283,6 +294,7 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 
 	//cv::rectangle(in_image, current_rect_, cv::Scalar(0,0,255), 2);
 
+	std::cout<<"stage4"<<std::endl;
 	if (prev_points_.size() > 0 )
 	{
 		cv::Point center_point = cv::Point(current_rect_.rect.x + current_rect_.rect.width/2, current_rect_.rect.y + current_rect_.rect.height/2);
@@ -311,7 +323,7 @@ cv::Mat LkTracker::Track(cv::Mat in_image, cv::LatentSvmDetector::ObjectDetectio
 	timer.stop();
 
 	//std::cout << timer.getTimeMilli() << std::endl;
-
+	std::cout<< "exit track"<<std::endl;
 	return in_image;
 }
 

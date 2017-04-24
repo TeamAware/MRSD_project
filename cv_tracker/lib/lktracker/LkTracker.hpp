@@ -50,13 +50,13 @@ class LkTracker
 								int in_thickness=1, int in_line_type=8, int in_shift=0, double in_tip_length=0.1);
 public:
 	int						object_id;
-	float					min_height_;
-	float					max_height_;
-	float					range_;
+	// float					min_height_;
+	// float					max_height_;
+	// float					range_;
 	unsigned int 			DEFAULT_LIFESPAN_;
 
 
-	LkTracker(int in_id, float in_min_height, float in_max_height, float in_range);
+	LkTracker(int in_id);
 	cv::Mat 								Track(cv::Mat image, cv::LatentSvmDetector::ObjectDetection in_detections, bool in_update);
 	cv::LatentSvmDetector::ObjectDetection	GetTrackedObject();
 	unsigned int							GetRemainingLifespan();

@@ -2,7 +2,7 @@
 	
 	<!-- arguments list -->
 	
-	<arg name="stereo_vision_node" default="/elas_ros/depth"/>
+	<arg name="stereo_vision_node" default="/stereo/disparity"/>
 	<arg name="ssd_car_topic_str" default="/obj_car/image_obj"/> 
 	<arg name="ssd_person_topic_str" default="/obj_person/image_obj"/> 
 

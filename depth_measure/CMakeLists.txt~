@@ -16,9 +16,11 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   genmsg
 
+
   message_generation
 )
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS signals)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -157,7 +159,7 @@ include_directories(
 
 add_executable(depth_measure src/depth_measure.cpp)
 add_dependencies(depth_measure cv_tracker_generate_messages_cpp depth_measure_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

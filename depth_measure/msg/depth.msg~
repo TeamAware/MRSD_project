@@ -1,5 +1,9 @@
 Header header
 string type
+
+#  position[] pos
+
 float32 x
 float32 y
 float32 depth
+

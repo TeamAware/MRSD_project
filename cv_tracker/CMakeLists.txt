@@ -30,7 +30,7 @@ add_message_files(
   image_rect.msg
   image_rect_ranged.msg
   obj_label.msg
-  depth.msg
+
 )
 
 generate_messages(
@@ -108,3 +108,31 @@ ENDIF()
 else()
   message("'SSD/Caffe' is not installed. 'ssd_unc' will not be built.")
 endif()
+
+## klt_tracker ##
+ADD_EXECUTABLE(klt_track
+  nodes/klt_track/klt_track.cpp
+)
+
+INCLUDE_DIRECTORIES(lib/lktracker)
+
+ADD_LIBRARY(lktracker
+  lib/lktracker/LkTracker.cpp
+)
+TARGET_LINK_LIBRARIES(lktracker
+  ${OpenCV_LIBS}
+)
+ADD_DEPENDENCIES(lktracker
+  cv_tracker_generate_messages_cpp
+)
+
+TARGET_LINK_LIBRARIES(klt_track
+  lktracker
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+)
+
+ADD_DEPENDENCIES(klt_track
+  libdpm_ocv_generate_messages_cpp
+)
+

@@ -85,7 +85,7 @@ class DepthMeasureApp
     /**********************************************************************************************/
 
     // Convert disparity map to depth image
-    // std::cout << "<<<<<<<<<<<<<<<<<<<inside disparity callback<<<<<<<<<<<<<<<<<<<<< " << std::endl;
+    std::cout << "<<<<<<<<<<<<<inside disparity callback<<<<<<<<<<<<<< " << std::endl;
 
     // cv::Mat_<float> disparityMat(disparity.image.height,
     //                              disparity.image.width,
@@ -116,6 +116,11 @@ class DepthMeasureApp
     disparityMat = disparityMat*16;
     cv::reprojectImageTo3D(disparityMat, depth_image_, Q_, true);
 
+    // world_x_ = depth_image_.at<cv::Vec3f>(image_u_,image_v_).val[0];
+    // world_y_ = depth_image_.at<cv::Vec3f>(image_u_,image_v_).val[1];
+    // world_z_ = depth_image_.at<cv::Vec3f>(image_u_,image_v_).val[2];
+    // std::cout << "world coordinate: ["<<world_x_<<", "<<world_y_<<", "<<world_z_<<"]"<<std::endl;
+
     /*********************************************************************************************/
     
     // Create new output message
@@ -137,27 +142,28 @@ class DepthMeasureApp
         
         cv::rectangle(eightBitDisparityMat,cv::Rect(coor[0],coor[1],coor[3],coor[2]),cv::Scalar(250,250,0,255),10);
    
-        // cout << "Entering the loop" << endl;
+        cout << "Entering the loop" << endl;
 
     	for (int x = coor[0]+coor[3]*0.2; x < coor[0]+coor[3]*0.8; x++)
     	{
     		for (int y = coor[1]+coor[2]*0.2; y < coor[1]+coor[2]*0.8; y++)
     		{
           
-	          if ( x < 2048 && y < 1536)
-	          {
-	            world_z_ = depth_image_.at<cv::Vec3f>(y,x).val[2] / 1000;
-	            world_x_ = depth_image_.at<cv::Vec3f>(y,x).val[0] / 1000;
+          if ( x < 2048 && y < 1536)
+          {
+            world_z_ = depth_image_.at<cv::Vec3f>(y,x).val[2] / 1000;
+            world_x_ = depth_image_.at<cv::Vec3f>(y,x).val[0] / 1000;
 
-	            if ( abs(world_z_-10.0) > 0.01 && world_z_ > 5 && world_z_ < 100)
-	            //if ( abs(world_z_ -10.0) > 0.01)
-	            {
-	              //cout << world_z_ << endl;
-	              z_w.push_back(world_z_);
-	              x_w.push_back(world_x_);
-
-	            } 
-	          }  
+            if ( abs(world_z_-10.0) > 0.01 && world_z_ > 5 && world_z_ < 100)
+            //if ( abs(world_z_ -10.0) > 0.01)
+            {
+              cout << world_z_ << endl;
+              z_w.push_back(world_z_);
+              x_w.push_back(world_x_);
+ 	      //cout << "---------" << endl;
+            } 
+          }  
+          // cout << depth_image_.rows << " " << depth_image_.cols << std::endl;
     		}
     	}
 
@@ -171,14 +177,13 @@ class DepthMeasureApp
     		// Find median 
     		_3dpos.u = coor[0]+coor[3]/2;
     		_3dpos.v = coor[1]+coor[2]/2;
-
-        int mid_x = int(x_w.size()/2);
-        int mid_z = int(z_w.size()/2);
         
-    		_3dpos.x = (x_w[mid_x-2]+x_w[mid_x-1]+x_w[mid_x]+x_w[mid_x+1]+x_w[mid_x+2])/5; // in meter
-    	  _3dpos.z = (z_w[mid_z-2]+z_w[mid_z-1]+z_w[mid_z]+z_w[mid_z+1]+z_w[mid_z+2])/5; // in meter
+                cout << "calculate position now" << endl;
+    		_3dpos.x = x_w[int(x_w.size()/2)]; // in meter
+    	        _3dpos.z = z_w[int(z_w.size()/2)]; // in meter
     		
                 output_message.pos.push_back(_3dpos);
+    		cout << "message" << output_message.pos.at(0).x << std::endl; 
     		std::cout << "world coordinate (in m): ["<<_3dpos.x<<", "<<_3dpos.z<<"]"<<std::endl;
         }
      }
@@ -189,21 +194,18 @@ class DepthMeasureApp
 
      if (image_obj.type == "car")
      {
-     	cout<<"car"<<endl;
+     	// cout<<"car"<<endl;
      	output_message.type = "car";
      	publisher_car_position_.publish(output_message);
      }
      else if (image_obj.type == "person")
      {
-     	ros::Duration(0.5).sleep();
-     	cout<<"person"<<endl;
+     	// cout<<"person"<<endl;
      	output_message.type = "person";
      	publisher_person_position_.publish(output_message);
      }
      else
      	std::cout<<"Do not find car or person"; 
-
-     cout<< "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" <<endl;
   }
 
 
@@ -267,15 +269,12 @@ public:
     typedef message_filters::sync_policies::ApproximateTime<stereo_msgs::DisparityImage, cv_tracker::image_obj> MySyncPolicy;
     // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
 
- 
+    message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), depth_sub, car_sub);
+    sync.registerCallback(boost::bind(&DepthMeasureApp::disparityCallback,this, _1, _2));
 
     message_filters::Synchronizer<MySyncPolicy> sync2(MySyncPolicy(100), depth_sub, person_sub);
     sync2.registerCallback(boost::bind(&DepthMeasureApp::disparityCallback,this, _1, _2));
 
-    
-
-    message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), depth_sub, car_sub);
-    sync.registerCallback(boost::bind(&DepthMeasureApp::disparityCallback,this, _1, _2));
     /*std::string config_topic("/config");  config_topic += ros::this_node::getNamespace() + "/ssd";
     subscriber_ssd_config_ =node_handle_.subscribe(config_topic, 1, &RosSsdApp::config_cb, this);*/
 

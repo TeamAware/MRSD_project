@@ -1,0 +1,13 @@
+<launch>
+   <arg name="vis" default="true"/>
+    <node if="$(arg vis)"
+        pkg="vis" type="vis_person"
+        name="vis_person" output = "screen">
+    </node>
+    <node if="$(arg vis)"
+        pkg="vis" type="vis_car"
+        name="vis_car" output = "screen" >
+    </node>
+
+    
+</launch>
