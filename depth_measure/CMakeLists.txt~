@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   genmsg
-
+  visualization_msgs
 
   message_generation
 )
@@ -58,7 +58,9 @@ find_package(Boost REQUIRED COMPONENTS signals)
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
+   RadarTCP.msg
    depth.msg
+   position.msg
    image_obj.msg
    image_obj_ranged.msg
    image_obj_tracked.msg
@@ -160,6 +162,11 @@ include_directories(
 add_executable(depth_measure src/depth_measure.cpp)
 add_dependencies(depth_measure cv_tracker_generate_messages_cpp depth_measure_generate_messages_cpp runtime_manager_generate_messages_cpp)
 target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_LIBRARIES})
+
+add_executable(vis_syn src/vis_syn.cpp)
+add_dependencies(vis_syn  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+target_link_libraries(vis_syn ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

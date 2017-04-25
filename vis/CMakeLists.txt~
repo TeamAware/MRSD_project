@@ -137,8 +137,18 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+
+
+
+# Put this line before the executable or library in your CMakeLists.txt
+  # rosbuild_add_boost_directories()
+   # assuming that my_target is your executable
+   #rosbuild_add_executable(vis_syn src/vis_syn.cpp)
+   # Put this line after the executable or library:
+
+
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 )
 add_executable(vis_car src/vis_car.cpp)
 
@@ -150,10 +160,16 @@ add_executable(vis_person src/vis_person.cpp)
 add_dependencies(vis_person  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
 target_link_libraries(vis_person ${catkin_LIBRARIES})
 
-add_executable(vis_car src/vis_radar.cpp)
+add_executable(vis_radar src/vis_radar.cpp)
 
-add_dependencies(vis_car  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(vis_car ${catkin_LIBRARIES})
+add_dependencies(vis_radar  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+target_link_libraries(vis_radar ${catkin_LIBRARIES})
+
+add_executable(vis_syn src/vis_syn.cpp)
+add_dependencies(vis_syn  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+target_link_libraries(vis_syn ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+  # rosbuild_link_boost(vis_syn signals)
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/vis.cpp
