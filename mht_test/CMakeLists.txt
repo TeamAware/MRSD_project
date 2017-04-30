@@ -1,26 +1,44 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(depth_measure)
+# set(Boost_INCLUDE_DIRS "/usr/include/boost")
+set(openmht_INCLUDE_DIRS "/home/teama/openmht/include/openmht/")
+# set(openmht_INCLUDE_DIRS "/openmht/include/openmht")
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/mht_test/cmake/Modules/")
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/home/teama/openmht/cmake/Modules/")
+
+project(mht_test)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/cmake/Modules/Findopenmht.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/cmake/Modules/LibFindMacros.cmake)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
+message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("aaaaaaaaaaaaaaaCMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message("ZZZZZZZZZZZZZZZCMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
+
+message("openmht_INCLUDE_DIRS: ${openmht_INCLUDE_DIRS}")
+message("openmht_LIBRARIES: ${openmht_LIBRARIES}")
+
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/cmake/Modules)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  cv_bridge
-  image_transport
-  image_geometry
-  roscpp
-  sensor_msgs
-  std_msgs
-  genmsg
-  visualization_msgs
-  geometry_msgs
-  message_generation
+find_package(
+	catkin REQUIRED COMPONENTS roscpp rospy std_msgs
+	# Boost REQUIRED COMPONENTS thread date_time iostreams program_options regex filesystem system 
+	# Eigen3 REQUIRED
 )
-find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS signals)
+
+find_package(Boost COMPONENTS thread date_time iostreams program_options regex
+  filesystem system REQUIRED
+)
+
+find_package(Eigen3 REQUIRED)
+
+find_package(openmht REQUIRED)
+# find_package(PkgConfig REQUIRED)
+# pkg_check_modules(openmht REQUIRED openmht)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -43,7 +61,8 @@ find_package(Boost REQUIRED COMPONENTS signals)
 ##   * add a build_depend tag for "message_generation"
 ##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
 ##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
+##     but can be declared ${EIGEN3_INCLUDE_DIR}  
+# for certainty nonetheless:
 ##     * add a run_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
@@ -56,19 +75,11 @@ find_package(Boost REQUIRED COMPONENTS signals)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-   FILES
-   RadarTCP.msg
-   depth.msg
-   position.msg
-   image_obj.msg
-   image_obj_ranged.msg
-   image_obj_tracked.msg
-   image_rect.msg
-   image_rect_ranged.msg
-   obj_label.msg
+# add_message_files(
+#   FILES
+#   Message1.msg
 #   Message2.msg
-)
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -85,13 +96,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-   sensor_msgs
-   geometry_msgs
-
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -101,7 +109,7 @@ generate_messages(
 ## package, follow these steps:
 ## * In the file package.xml:
 ##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
-## * In this file (CMakeLists.txt):
+## * In this file (CMakeLopenmht_LIBRARIESists.txt):
 ##   * add "dynamic_reconfigure" to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
 ##   * uncomment the "generate_dynamic_reconfigure_options" section below
@@ -123,15 +131,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    CATKIN_DEPENDS
-#  LIBRARIES depth_measure
-#  CATKIN_DEPENDS 
-    roscpp 
-    std_msgs
-    sensor_msgs
-    message_runtime
-    geometry_msgs
-#  DEPENDS system_lib
+#  INCLUDE_DIRS include
+#  LIBRARIES mht_test
+ CATKIN_DEPENDS roscpp rospy std_msgs
+ # DEPENDS Boost
 )
 
 ###########
@@ -142,12 +145,27 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+	include
+  ${catkin_INCLUDE_DIRS}
 )
+
+include_directories(
+  ${openmht_INCLUDE_DIRS}
+)
+include_directories(
+  ${Boost_INCLUDE_DIRS}
+)
+include_directories(
+  ${EIGEN3_INCLUDE_DIR}
+)
+ #  ${openmht_INCLUDE_DIRS}
+ #  ${Boost_INCLUDE_DIRS}	
+	# ${EIGEN3_INCLUDE_DIR}  
+
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/depth_measure.cpp
+#   src/${PROJECT_NAME}/mht_test.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -158,25 +176,34 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/depth_measure_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/mht_test_node.cpp)
 
-add_executable(depth_measure src/depth_measure.cpp)
-add_dependencies(depth_measure cv_tracker_generate_messages_cpp depth_measure_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_LIBRARIES})
 
-add_executable(vis_syn1 src/vis_syn.cpp)
-add_dependencies(vis_syn1  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(vis_syn1 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(mht_test src/main.cpp)
+# target_link_libraries(talker ${catkin_LIBRARIES})
+# add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+target_link_libraries(
+	mht_test 
+	${catkin_LIBRARIES} 
+	# ${Boost_LIBRARIES}
 
-add_executable(vis_gps src/vis_gps.cpp)
-add_dependencies(vis_gps  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(vis_gps ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+)
+
+target_link_libraries(
+	mht_test
+	${openmht_LIBRARIES}  
+	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-common.so
+	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-filter.so
+	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-multi.so
+	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-plot.so
+	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-sim.so
+)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-# set_target_properties(depth_measure 
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -226,7 +253,7 @@ target_link_libraries(vis_gps ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_depth_measure.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_mht_test.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

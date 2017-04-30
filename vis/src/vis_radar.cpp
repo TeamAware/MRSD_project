@@ -63,11 +63,11 @@ void MarkerCallback(const beginner_tutorials::RadarTCP::ConstPtr& input)
 
       if (msg.p_amp[i] < 0.1) //Low amplitude detection 
       {
-        radarArray.markers[i].color.a = 0.1;
+        radarArray.markers[i].color.a = 0.1;   // 0.1
       } else if (msg.p_amp[i] > 10.0) { // high amplitude
         radarArray.markers[i].color.a = 1.0;
       } else {
-        radarArray.markers[i].color.a = 0.7;
+        radarArray.markers[i].color.a = 0.3;   // 0.7
       }
 
 
@@ -78,7 +78,7 @@ void MarkerCallback(const beginner_tutorials::RadarTCP::ConstPtr& input)
 
       radarArray.markers[i].pose.position.x = msg.p_rng[i] * sin(msg.p_ang[i]*0.0174533);
       // cout << sin(msg.p_ang[i]) << endl;
-      radarArray.markers[i].pose.position.y = msg.p_rng[i] * cos(msg.p_ang[i]*0.0174533);
+      radarArray.markers[i].pose.position.y = msg.p_rng[i] * cos(msg.p_ang[i]*0.0174533) - 1;
       // cout << cos(msg.p_ang[i]) << endl << endl;
       //p.z = 0;
       // points.points.push_back(p);

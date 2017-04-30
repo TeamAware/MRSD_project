@@ -342,6 +342,8 @@ try {
                 // int16_t rat_arr[64];
                 // int16_t ang_arr[64];
                 // int16_t amp_arr[64];
+                
+                float ang_offset = 5.0; // in degrees
 
                 for (int t_id = 0; t_id < 64; ++t_id)
                 {
@@ -350,13 +352,14 @@ try {
                   //[0,204.7] SCALE: 0.1 OFFSET: 200
                   rat_arr[t_id] = ((int16_t)read_value(xcpMsgBuf, RAT_OFFSET + (t_id*RAT_SIZE), RAT_SIZE))*1.0/128.0;
                   //[-81.92,81.91] SCALE: 0.01 OFFSET: 81.91
-                  ang_arr[t_id] = ((int16_t)read_value(xcpMsgBuf, ANG_OFFSET + (t_id*ANG_SIZE), ANG_SIZE))*1.0/128.0;
+                  ang_arr[t_id] = (((int16_t)read_value(xcpMsgBuf, ANG_OFFSET + (t_id*ANG_SIZE), ANG_SIZE))*1.0/128.0)-ang_offset;
                   //[-51.2,51.1] SCALE: 0.1 OFFSET: 0
                   amp_arr[t_id] = ((int16_t)read_value(xcpMsgBuf, AMP_OFFSET + (t_id*AMP_SIZE), AMP_SIZE))*1.0/128.0;
 
 
                 }
 
+                  msg.header.stamp = ros::Time::now();
                   msg.scanType = scanType;
                   msg.timeStamp = timeStamp;
                   msg.scanIndex = scanIndex;

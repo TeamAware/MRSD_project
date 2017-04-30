@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <geometry_msgs/TwistStamped.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -16,15 +17,19 @@ class VIS
   ros::Publisher marker_pub_person;
 
 
-  void synCallback(const beginner_tutorials::RadarTCPConstPtr& radar_input, const depth_measure::depthConstPtr& car_input, const depth_measure::depthConstPtr& person_input)
+  void synCallback(const beginner_tutorials::RadarTCPConstPtr& radar_input, const depth_measure::depthConstPtr& car_input, const depth_measure::depthConstPtr& person_input, const geometry_msgs::TwistStampedConstPtr& gpsVel_input)
   {
       beginner_tutorials::RadarTCP msg = *radar_input;
+      geometry_msgs::TwistStamped gpsVel_msg = *gpsVel_input;
       
 
       visualization_msgs::MarkerArray radarArray;
       radarArray.markers.resize(64);
 
-
+      double velX = gpsVel_msg.twist.linear.x;
+      double velY = gpsVel_msg.twist.linear.y;
+      // assuming y is the direction we're heading in. (points ot the front of the car)
+      double velToAdd = (pow((pow(velX,2)+pow(velY,2)),0.5))*velY/abs(velY); // in m/s
       // Create the vertices for the points and lines
       for (uint32_t i = 0; i < 64; ++i)
       {
@@ -59,10 +64,20 @@ class VIS
         radarArray.markers[i].pose.orientation.z = 1.0;
         radarArray.markers[i].pose.orientation.w = 1.0;
 
+
+        // Convert from relative rngrat to absolute velocity 
+        double scaleVel = msg.p_rat[i] + velToAdd;
+
+
         // Set the scale of the marker -- 1x1x1 here means 1m on a side
         radarArray.markers[i].scale.x = 1.0;
-        radarArray.markers[i].scale.y = 1.0;
         radarArray.markers[i].scale.z = 1.0;
+        
+        radarArray.markers[i].scale.y = std::min(scaleVel / 5.0, 0.5);
+        std::cout << "vel" << scaleVel << std::endl;
+         // 1 m on the graph = 5m/s = 11.18 mph = 18 km/h
+        //  minimum displayed is 2.5m/s = 9 km/h
+        
 
         // Set the color -- be sure to set alpha to something non-zero!
         radarArray.markers[i].color.r = 0.0f;
@@ -224,14 +239,15 @@ class VIS
     message_filters::Subscriber< beginner_tutorials::RadarTCP> radar_sub(node_handle_, "parsed_radar", 1);
     message_filters::Subscriber<depth_measure::depth> car_sub(node_handle_, "/car_pos", 1);
     message_filters::Subscriber<depth_measure::depth> person_sub(node_handle_, "/person_pos", 1);
+    message_filters::Subscriber<geometry_msgs::TwistStamped> gpsVel_sub(node_handle_, "/vel", 1);
 
-    typedef message_filters::sync_policies::ApproximateTime<beginner_tutorials::RadarTCP,depth_measure::depth,depth_measure::depth> MySyncPolicy;
+    typedef message_filters::sync_policies::ApproximateTime<beginner_tutorials::RadarTCP,depth_measure::depth,depth_measure::depth, geometry_msgs::TwistStamped> MySyncPolicy;
       // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
 
    
 
-    message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(1000), radar_sub,car_sub, person_sub);
-    sync.registerCallback(boost::bind(&VIS::synCallback, this, _1, _2, _3));
+    message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(1000), radar_sub,car_sub, person_sub, gpsVel_sub);
+    sync.registerCallback(boost::bind(&VIS::synCallback, this, _1, _2, _3, _4));
 
     marker_pub_radar = node_handle_.advertise<visualization_msgs::MarkerArray>("visualization_syn_radar", 10);
     marker_pub_car = node_handle_.advertise<visualization_msgs::Marker>("visualization_syn_car", 10);

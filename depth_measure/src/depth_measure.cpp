@@ -120,7 +120,7 @@ class DepthMeasureApp
     
     // Create new output message
     depth_measure::depth output_message;
-    output_message.header = eightBitDisparity.header;
+    output_message.header = disparity.header;
 
 
 
@@ -149,7 +149,7 @@ class DepthMeasureApp
 	            world_z_ = depth_image_.at<cv::Vec3f>(y,x).val[2] / 1000;
 	            world_x_ = depth_image_.at<cv::Vec3f>(y,x).val[0] / 1000;
 
-	            if ( abs(world_z_-10.0) > 0.01 && world_z_ > 5 && world_z_ < 100)
+	            if ( abs(world_z_-10.0) > 0.01 && world_z_ > 8 && world_z_ < 50)
 	            //if ( abs(world_z_ -10.0) > 0.01)
 	            {
 	              //cout << world_z_ << endl;
@@ -175,8 +175,11 @@ class DepthMeasureApp
         int mid_x = int(x_w.size()/2);
         int mid_z = int(z_w.size()/2);
         
-    		_3dpos.x = (x_w[mid_x-2]+x_w[mid_x-1]+x_w[mid_x]+x_w[mid_x+1]+x_w[mid_x+2])/5; // in meter
-    	  _3dpos.z = (z_w[mid_z-2]+z_w[mid_z-1]+z_w[mid_z]+z_w[mid_z+1]+z_w[mid_z+2])/5; // in meter
+    		//_3dpos.x = (x_w[mid_x-2]+x_w[mid_x-1]+x_w[mid_x]+x_w[mid_x+1]+x_w[mid_x+2])/5; // in meter
+    	  //_3dpos.z = (z_w[mid_z-2]+z_w[mid_z-1]+z_w[mid_z]+z_w[mid_z+1]+z_w[mid_z+2])/5; // in meter
+
+        _3dpos.x = x_w[mid_x]; // in meter
+        _3dpos.z = z_w[mid_z]; // in meter
     		
                 output_message.pos.push_back(_3dpos);
     		std::cout << "world coordinate (in m): ["<<_3dpos.x<<", "<<_3dpos.z<<"]"<<std::endl;

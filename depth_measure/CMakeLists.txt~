@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   genmsg
   visualization_msgs
-
+  geometry_msgs
   message_generation
 )
 find_package(OpenCV REQUIRED)
@@ -130,6 +130,7 @@ catkin_package(
     std_msgs
     sensor_msgs
     message_runtime
+    geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -163,10 +164,13 @@ add_executable(depth_measure src/depth_measure.cpp)
 add_dependencies(depth_measure cv_tracker_generate_messages_cpp depth_measure_generate_messages_cpp runtime_manager_generate_messages_cpp)
 target_link_libraries(depth_measure ${catkin_LIBRARIES} ${OpenCV_LIBS}  ${Boost_LIBRARIES})
 
-add_executable(vis_syn src/vis_syn.cpp)
-add_dependencies(vis_syn  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
-target_link_libraries(vis_syn ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(vis_syn1 src/vis_syn.cpp)
+add_dependencies(vis_syn1  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+target_link_libraries(vis_syn1 ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_executable(vis_gps src/vis_gps.cpp)
+add_dependencies(vis_gps  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+target_link_libraries(vis_gps ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
