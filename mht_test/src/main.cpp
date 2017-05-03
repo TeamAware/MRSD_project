@@ -22,10 +22,11 @@ public:
      Eigen::Vector2d velocity;
 };
 
+
+// Generate random numbers with normal dist
 boost::mt19937 gener_;
 boost::normal_distribution<> normal_dist_(0,1.0);
-boost::variate_generator<boost::mt19937&, 
-                         boost::normal_distribution<> > rng_normal(gener_,normal_dist_);
+boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > rng_normal(gener_,normal_dist_);
 
 void step_dynamics(std::list<Contact> &contacts, double dt)
 {
@@ -45,11 +46,22 @@ Contact add_noise(Contact &contact)
 
 int main(int argc, char *argv[])
 {
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Generate fake data 
+
+		//generating rand dists seeded on time 
      rng_normal.engine().seed(static_cast<unsigned int>(std::time(0)));
      rng_normal.distribution().reset();
      
+
+     // For example data 
      int num_contacts = 3;   
      std::list<Contact> contacts;
+
+
+     //Generating random readings 
      for (int i = 0; i < num_contacts; i++) {
           Contact c;     
           c.id = i;
@@ -58,25 +70,38 @@ int main(int argc, char *argv[])
           contacts.push_back(c);
      }
 
+     // Printing rands with norm dist 
      for (int i = 0; i < 100; i++) {
           cout << rng_normal() << endl;
      }
      
-     double t0 = 0;
-     double dt = 1;
-     double tend = 20;
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Actual code starts 
+
+
+
+     // TODO modify this to work continously using messages? 
+     double t0 = 0; // start time
+     double dt = 1; //update period 
+     double tend = 20; //time end 
      
      openmht::Plot plot;
      std::map<int, std::list<Eigen::Vector2d> > truth, measured, tracked;
           
+     //  start an instance of openMHT
      openmht::MHT mht;   
+     // set the sensor update period (seconds).
      mht.set_dt(dt);
+
+
      for (double t = t0; t < tend; t += dt) {
 
-          // Convert from your list of 2D detection points to a list of
+          // Convert from your list of 2D detection points to a list of openMHT measurements 
           std::list<openmht::Measurement> m_list;
-          for (std::list<Contact>::iterator it = contacts.begin(); 
-               it != contacts.end(); it++) {
+
+
+          // Add all new points to the list to process them (after for loop)
+          for (std::list<Contact>::iterator it = contacts.begin(); it != contacts.end(); it++) {
 
           	   //latest measurement from sensor? 
                Contact c = add_noise(*it);
@@ -86,7 +111,8 @@ int main(int argc, char *argv[])
                m.set_position(c.position);
                m_list.push_back(m);
 
-               // Save the measured position for plotting later
+               // Save the measured position for plotting later 
+               //(this uses the id, otherwise algo doesnt seem to)
                measured[c.id].push_back(c.position);
           }
           
@@ -98,14 +124,12 @@ int main(int argc, char *argv[])
           std::list<openmht::Entity> ents = mht.entities();
 
           // Save the filtered locations of each track
-          for (std::list<openmht::Entity>::iterator it = ents.begin(); 
-               it != ents.end(); it++) {            
+          for (std::list<openmht::Entity>::iterator it = ents.begin(); it != ents.end(); it++) {            
                tracked[it->id()].push_back(it->position());
           }                              
           
           // Save the truth tracks:
-          for (std::list<Contact>::iterator it = contacts.begin(); 
-               it != contacts.end(); it++) {
+          for (std::list<Contact>::iterator it = contacts.begin(); it != contacts.end(); it++) {
                truth[it->id].push_back(it->position);
           }
 

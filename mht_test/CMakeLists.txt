@@ -25,9 +25,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/cmak
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(
-	catkin REQUIRED COMPONENTS roscpp rospy std_msgs
-	# Boost REQUIRED COMPONENTS thread date_time iostreams program_options regex filesystem system 
-	# Eigen3 REQUIRED
+    catkin REQUIRED COMPONENTS roscpp rospy std_msgs visualization_msgs genmsg message_generation
+    # Boost REQUIRED COMPONENTS thread date_time iostreams program_options regex filesystem system 
+    # Eigen3 REQUIRED
 )
 
 find_package(Boost COMPONENTS thread date_time iostreams program_options regex
@@ -75,11 +75,10 @@ find_package(openmht REQUIRED)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  RadarTCP.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -96,10 +95,11 @@ find_package(openmht REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -133,7 +133,7 @@ find_package(openmht REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES mht_test
- CATKIN_DEPENDS roscpp rospy std_msgs
+ CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
  # DEPENDS Boost
 )
 
@@ -145,7 +145,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-	include
+    include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -159,8 +159,8 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
 )
  #  ${openmht_INCLUDE_DIRS}
- #  ${Boost_INCLUDE_DIRS}	
-	# ${EIGEN3_INCLUDE_DIR}  
+ #  ${Boost_INCLUDE_DIRS}   
+    # ${EIGEN3_INCLUDE_DIR}  
 
 
 ## Declare a C++ library
@@ -179,25 +179,55 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/mht_test_node.cpp)
 
 
-add_executable(mht_test src/main.cpp)
+add_executable(mht_test src/main_msg.cpp)
 # target_link_libraries(talker ${catkin_LIBRARIES})
 # add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+
+add_dependencies(mht_test  visualization_generate_messages_cpp runtime_manager_generate_messages_cpp)
+
 target_link_libraries(
-	mht_test 
-	${catkin_LIBRARIES} 
-	# ${Boost_LIBRARIES}
+    mht_test 
+    ${catkin_LIBRARIES} 
+    # ${Boost_LIBRARIES}
 
 )
 
 target_link_libraries(
-	mht_test
-	${openmht_LIBRARIES}  
-	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-common.so
-	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-filter.so
-	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-multi.so
-	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-plot.so
-	${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-sim.so
+    mht_test
+    ${openmht_LIBRARIES}  
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-common.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-filter.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-multi.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-plot.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-sim.so
 )
+
+
+# add_executable(mht_msg src/main_msg.cpp)
+# target_link_libraries(talker ${catkin_LIBRARIES})
+# add_dependencies(talker beginner_tutorials_generate_messages_cpp)
+
+
+
+# target_link_libraries(
+#     mht_msg 
+#     ${catkin_LIBRARIES} 
+#     # ${Boost_LIBRARIES}
+
+# )
+
+# target_link_libraries(
+#     mht_msg
+#     ${openmht_LIBRARIES}  
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-common.so
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-filter.so
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-multi.so
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-plot.so
+#     ${CMAKE_CURRENT_SOURCE_DIR}/include/openmht/lib/libopenmht-sim.so
+# )
+
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

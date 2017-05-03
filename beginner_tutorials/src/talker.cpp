@@ -343,7 +343,7 @@ try {
                 // int16_t ang_arr[64];
                 // int16_t amp_arr[64];
                 
-                float ang_offset = 5.0; // in degrees
+                float ang_offset = 7.0; // in degrees
 
                 for (int t_id = 0; t_id < 64; ++t_id)
                 {
